@@ -51,8 +51,8 @@ const App = () => {
         <button onClick = {handleLogout}
         style={{
           position: 'fixed',
-          bottom: '60px',
-          right: '20px',
+          bottom: '1px',
+          right: '',
           backgroundColor: '#3a5a40',
           color: '#fff', 
           border: 'none', 
