@@ -6,6 +6,7 @@ import Auth from './components/Auth/Auth';
 import useStyles from './styles';
 import { Provider } from './context/context';
 import BudgetTracker from './components/BudgetTracker/BudgetTracker'; 
+import FinancialInsights from './components/FinancialInsights/FinancialInsights'; 
 
 
 const App = () => {
@@ -55,11 +56,15 @@ const App = () => {
             <BudgetTracker />
           </Grid>
 
+          <Grid item xs={12} md={6}>
+            <FinancialInsights />
+          </Grid>
+
         <button onClick = {handleLogout}
         style={{
           position: 'fixed',
-          bottom: '1px',
-          right: '',
+          bottom: '10px',
+          left: '10px',
           backgroundColor: '#3a5a40',
           color: '#fff', 
           border: 'none', 
