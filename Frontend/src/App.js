@@ -5,6 +5,8 @@ import Main from './components/Main/Main';
 import Auth from './components/Auth/Auth';
 import useStyles from './styles';
 import { Provider } from './context/context';
+import BudgetTracker from './components/BudgetTracker/BudgetTracker'; 
+
 
 const App = () => {
   const classes = useStyles();
@@ -48,6 +50,11 @@ const App = () => {
         <Grid item xs={12} sm={4} className={classes.last}>
           <Details title="Expense" />
         </Grid>
+
+        <Grid item xs={12} md={6}>
+            <BudgetTracker />
+          </Grid>
+
         <button onClick = {handleLogout}
         style={{
           position: 'fixed',
