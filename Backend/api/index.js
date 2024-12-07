@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
       category: { type: String, required: true },
       amount: { type: Number, required: true },
       date: { type: String, required: true },
-      id: { type: String, required: true }
+      id: { type: String, required: true },
     }]
   });
   

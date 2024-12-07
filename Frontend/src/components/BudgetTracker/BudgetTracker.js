@@ -6,7 +6,7 @@ import {
   Typography, 
   LinearProgress, 
   Button, 
-  Dialog,   
+  Dialog, 
   DialogTitle, 
   DialogContent, 
   DialogActions, 
@@ -24,10 +24,28 @@ const BudgetTracker = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [budgetAmount, setBudgetAmount] = useState('');
 
-  // Load budgets from localStorage on component mount
+  // Initialize budgets with 0 for all categories on component mount
   useEffect(() => {
     const savedBudgets = JSON.parse(localStorage.getItem('categoryBudgets') || '{}');
-    setBudgets(savedBudgets);
+    
+    // Create an object with all categories initialized to 0
+    const initialBudgets = expenseCategories.reduce((acc, category) => {
+      acc[category.type] = 0;
+      return acc;
+    }, {});
+
+    // Merge saved budgets with initial budgets, preferring saved values
+    const mergedBudgets = {
+      ...initialBudgets,
+      ...savedBudgets
+    };
+
+    setBudgets(mergedBudgets);
+    
+    // Save the merged budgets to localStorage if it's different from saved
+    if (Object.keys(savedBudgets).length !== expenseCategories.length) {
+      localStorage.setItem('categoryBudgets', JSON.stringify(mergedBudgets));
+    }
   }, []);
 
   // Calculate total expenses for each category
@@ -40,6 +58,7 @@ const BudgetTracker = () => {
   // Open budget setting dialog
   const handleOpenBudgetDialog = (category) => {
     setSelectedCategory(category);
+    setBudgetAmount(budgets[category] || '');
     setOpenBudgetDialog(true);
   };
 
@@ -47,7 +66,7 @@ const BudgetTracker = () => {
   const handleSaveBudget = () => {
     const newBudgets = {
       ...budgets,
-      [selectedCategory]: Number(budgetAmount)
+      [selectedCategory]: Number(budgetAmount) || 0 // Ensure we store 0 if input is empty or invalid
     };
     setBudgets(newBudgets);
     localStorage.setItem('categoryBudgets', JSON.stringify(newBudgets));
@@ -57,13 +76,11 @@ const BudgetTracker = () => {
 
   return (
     <Card className={classes.budgetCard}>
-      <CardHeader title="Monthly Category Budgets" className={classes.cardHeader}
- 
-      />
-      <CardContent className = {classes.cardContent}>
+      <CardHeader title="Monthly Category Budgets" className={classes.cardHeader} />
+      <CardContent className={classes.cardContent}>
         {expenseCategories.map((category) => {
           const totalExpense = calculateCategoryExpenses(category.type);
-          const budgetAmount = budgets[category.type] || 0;
+          const budgetAmount = budgets[category.type] ?? 0; // Use nullish coalescing to ensure 0 if undefined
           const progressPercentage = budgetAmount 
             ? Math.min((totalExpense / budgetAmount) * 100, 100) 
             : 0;
@@ -76,6 +93,7 @@ const BudgetTracker = () => {
                   size="small" 
                   color="primary" 
                   onClick={() => handleOpenBudgetDialog(category.type)}
+                  className={classes.budgetButton}
                 >
                   Set Budget
                 </Button>
@@ -87,6 +105,10 @@ const BudgetTracker = () => {
                 variant="determinate" 
                 value={progressPercentage}
                 color={progressPercentage > 100 ? 'secondary' : 'primary'}
+                classes={{
+                  root: classes.progressRoot,
+                  bar: classes.progressBar
+                }}
               />
             </div>
           );
@@ -96,7 +118,10 @@ const BudgetTracker = () => {
       {/* Budget Setting Dialog */}
       <Dialog 
         open={openBudgetDialog} 
-        onClose={() => setOpenBudgetDialog(false)}
+        onClose={() => {
+          setOpenBudgetDialog(false);
+          setBudgetAmount('');
+        }}
       >
         <DialogTitle>Set Budget for {selectedCategory}</DialogTitle>
         <DialogContent>
@@ -108,10 +133,17 @@ const BudgetTracker = () => {
             fullWidth
             value={budgetAmount}
             onChange={(e) => setBudgetAmount(e.target.value)}
+            inputProps={{ min: "0", step: "0.01" }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenBudgetDialog(false)} color="primary">
+          <Button 
+            onClick={() => {
+              setOpenBudgetDialog(false);
+              setBudgetAmount('');
+            }} 
+            color="primary"
+          >
             Cancel
           </Button>
           <Button onClick={handleSaveBudget} color="primary">

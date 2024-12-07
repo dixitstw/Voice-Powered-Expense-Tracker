@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Grid } from "@material-ui/core";
+import { Button, Dialog, Grid } from "@material-ui/core";
 import Details from "./components/Details/Details";
 import Main from './components/Main/Main';
 import Auth from './components/Auth/Auth';
@@ -7,11 +7,14 @@ import useStyles from './styles';
 import { Provider } from './context/context';
 import BudgetTracker from './components/BudgetTracker/BudgetTracker'; 
 import FinancialInsights from './components/FinancialInsights/FinancialInsights'; 
-
+import DailyChallenge from './components/FinancialChallenge/FinancialChallenge';
+import TransactionsTable from './components/TransactionsTable/TransactionsTable';
 
 const App = () => {
   const classes = useStyles();
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const [isDailyChallengeOpen, setIsDailyChallengeOpen] = useState(false);
+
 
   const handleAuthSuccess = (userData) => {
     setUser(userData);
@@ -23,10 +26,46 @@ const App = () => {
     setUser(null);
   };
 
+
+  const handleOpenDailyChallenge = () => {
+    setIsDailyChallengeOpen(true);
+  };
+
+  const handleCloseDailyChallenge = () => {
+    setIsDailyChallengeOpen(false);
+  };
+
   if (!user) return <Auth onAuthSuccess={handleAuthSuccess} />;
 
   return (
     <Provider>
+<Button
+  variant="contained" 
+  color="primary" 
+  onClick={handleOpenDailyChallenge}
+  style={{
+    position: 'fixed', 
+    top: '20px',
+    right: '20px',     
+    zIndex: 1000,     
+   backgroundColor: '#3a5a40',
+          color: '#fff', 
+          textTransform: 'none', 
+          border: 'none', 
+          borderRadius: '8px', 
+          padding: '8px 15px', 
+          fontSize: '18px', 
+          fontWeight: 'bold', 
+          cursor: 'pointer', 
+          transition: 'all 0.3s ease', 
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', 
+          overflow: 'hidden', 
+          fontFamily: 'Merriweather'
+        }}
+    
+>
+  Daily Challenge
+</Button>
     <div>
       <Grid 
         className={classes.grid}
@@ -59,6 +98,19 @@ const App = () => {
           <Grid item xs={12} md={6}>
             <FinancialInsights />
           </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TransactionsTable />
+          </Grid>
+
+          <Dialog
+          open={isDailyChallengeOpen}
+          onClose={handleCloseDailyChallenge}
+          maxWidth="md"
+          fullWidth
+        >
+          <DailyChallenge onClose={handleCloseDailyChallenge} />
+        </Dialog>
 
         <button onClick = {handleLogout}
         style={{
