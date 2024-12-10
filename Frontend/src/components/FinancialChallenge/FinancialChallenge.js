@@ -131,7 +131,7 @@ const DailyChallenge = () => {
         }}
       >
         <Typography variant="h8">
-          Total Challenge Rewards
+          Total Challenge Savings
         </Typography>
         <Typography variant="h6" style={{ fontWeight: 'bold' }}>
           ${totalChallengeRewards.toFixed(2)}
@@ -168,10 +168,10 @@ const DailyChallenge = () => {
         open={rewardDialogOpen} 
         onClose={handleCloseRewardDialog}
       >
-        <DialogTitle>Set Your Challenge Reward</DialogTitle>
+        <DialogTitle>Set Your Challenge Savings</DialogTitle>
         <DialogContent>
           <Typography>
-            How much would you like to reward yourself for completing this challenge?
+            How much would you like to reward yourself with savings for completing this challenge?
           </Typography>
           <TextField
             autoFocus
@@ -210,7 +210,7 @@ const DailyChallenge = () => {
             Congratulations! You've earned ${userDefinedReward} for completing today's challenge.
           </Typography>
           <Typography style={{ marginTop: '10px' }}>
-            Total Challenge Rewards: ${totalChallengeRewards.toFixed(2)}
+            Total Challenge Reward Savings: ${totalChallengeRewards.toFixed(2)}
           </Typography>
         </DialogContent>
         <DialogActions>
