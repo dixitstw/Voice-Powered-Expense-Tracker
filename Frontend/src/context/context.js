@@ -6,7 +6,6 @@ const initialState = [];
 export const ExpenseTrackerContext = createContext(initialState);
 const BASE_URL = process.env.REACT_APP_BASE_URL;
 
-
 export const Provider = ({ children }) => {
   const [transactions, dispatch] = useReducer(contextReducer, initialState);
 
@@ -17,14 +16,11 @@ export const Provider = ({ children }) => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await fetch(
-          `${BASE_URL}/api/gettransactions`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${BASE_URL}/api/gettransactions`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) throw new Error("Failed to fetch transactions");
 
@@ -41,15 +37,12 @@ export const Provider = ({ children }) => {
   const deleteTransaction = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${BASE_URL}/api/deletetransactions/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${BASE_URL}/api/deletetransactions/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) throw new Error("Failed to delete transaction");
 
@@ -63,17 +56,14 @@ export const Provider = ({ children }) => {
   const addTransaction = async (transaction) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${BASE_URL}/api/posttransactions`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(transaction),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/api/posttransactions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(transaction),
+      });
 
       if (response.ok) {
         const updatedTransactions = await response.json();

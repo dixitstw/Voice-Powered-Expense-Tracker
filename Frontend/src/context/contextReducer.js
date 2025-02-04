@@ -1,27 +1,27 @@
 //Reducer => A function that takes in the old state, and an action => new state...
 
-const contextReducer = (state, action)=> {
- let transactions;
+const contextReducer = (state, action) => {
+  let transactions;
 
- switch(action.type) {
-    case 'DELETE-TRANSACTION':
-        transactions = state.filter((t)=> t.id !== action.payload)
+  switch (action.type) {
+    case "DELETE-TRANSACTION":
+      transactions = state.filter((t) => t.id !== action.payload);
 
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-        
-        return transactions;
+      localStorage.setItem("transactions", JSON.stringify(transactions));
 
-        case 'ADD-TRANSACTION':
-            transactions = [action.payload, ...state]
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            return transactions;
+      return transactions;
 
-            case 'SET_TRANSACTIONS':
-                return action.payload;
+    case "ADD-TRANSACTION":
+      transactions = [action.payload, ...state];
+      localStorage.setItem("transactions", JSON.stringify(transactions));
+      return transactions;
 
-            default:
-            return transactions;;
- }
-}
+    case "SET_TRANSACTIONS":
+      return action.payload;
+
+    default:
+      return transactions;
+  }
+};
 
 export default contextReducer;

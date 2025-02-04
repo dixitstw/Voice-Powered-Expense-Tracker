@@ -126,7 +126,7 @@ const Auth = ({ onAuthSuccess }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    name: "", 
+    name: "",
   });
   const BASE_URL = process.env.REACT_APP_BASE_URL;
   const [error, setError] = useState("");

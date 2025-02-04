@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { 
+import React, { useState, useEffect, useContext } from "react";
+import {
   Card,
   CardContent,
   Typography,
@@ -10,16 +10,16 @@ import {
   DialogActions,
   Box,
   TextField,
-  Grid
-} from '@material-ui/core';
-import { 
-  LocalDining as DiningIcon, 
-  DirectionsBus as TransportIcon, 
-  ShoppingCart as ShoppingIcon, 
-  PowerOff as UtilityIcon 
-} from '@material-ui/icons';
-import { ExpenseTrackerContext } from '../../context/context';
-import useStyles from './styles';
+  Grid,
+} from "@material-ui/core";
+import {
+  LocalDining as DiningIcon,
+  DirectionsBus as TransportIcon,
+  ShoppingCart as ShoppingIcon,
+  PowerOff as UtilityIcon,
+} from "@material-ui/icons";
+import { ExpenseTrackerContext } from "../../context/context";
+import useStyles from "./styles";
 
 const DailyChallenges = () => {
   const classes = useStyles();
@@ -37,39 +37,39 @@ const DailyChallenges = () => {
       title: "No Dining Out Challenge",
       description: "Cook all meals at home today",
       category: "Food",
-      icon: DiningIcon
+      icon: DiningIcon,
     },
     {
       id: 2,
       title: "Transport Savings",
       description: "Use public transport or walk today",
       category: "Travel",
-      icon: TransportIcon
+      icon: TransportIcon,
     },
     {
       id: 3,
       title: "Expense Freeze",
       description: "Avoid any unnecessary expenses",
       category: "Shopping",
-      icon: ShoppingIcon
+      icon: ShoppingIcon,
     },
     {
       id: 4,
       title: "Utility Saver",
       description: "Reduce electricity and water usage",
       category: "Bills",
-      icon: UtilityIcon
-    }
+      icon: UtilityIcon,
+    },
   ];
 
   useEffect(() => {
     try {
-      const storedCompletions = localStorage.getItem('challengeCompletions');
+      const storedCompletions = localStorage.getItem("challengeCompletions");
       if (storedCompletions) {
         setChallengeCompletions(JSON.parse(storedCompletions));
       }
     } catch (error) {
-      console.error('Error loading challenge completions:', error);
+      console.error("Error loading challenge completions:", error);
       setChallengeCompletions({});
     }
   }, []);
@@ -77,10 +77,10 @@ const DailyChallenges = () => {
   useEffect(() => {
     const challengeRewards = transactions
       ? transactions
-          .filter(transaction => transaction.category === 'Challenge Reward')
+          .filter((transaction) => transaction.category === "Challenge Reward")
           .reduce((total, transaction) => total + transaction.amount, 0)
       : 0;
-    
+
     setTotalChallengeRewards(challengeRewards);
   }, [transactions]);
 
@@ -101,38 +101,39 @@ const DailyChallenges = () => {
       try {
         // Create the transaction object
         const rewardTransaction = {
-          type: 'Income',
-          category: 'Challenge Reward',
+          type: "Income",
+          category: "Challenge Reward",
           amount: parseFloat(reward),
-          date: new Date().toISOString().split('T')[0],
+          date: new Date().toISOString().split("T")[0],
           id: Math.floor(Math.random() * 1000000), // Generate a random ID
-          title: `${selectedChallenge.title} Reward` // Add a title for the transaction
+          title: `${selectedChallenge.title} Reward`,
         };
 
-        // Add the transaction using the context
         addTransaction(rewardTransaction);
 
-        // Update challenge completions
-        const existingCompletions = challengeCompletions[selectedChallenge.id] || [];
+        const existingCompletions =
+          challengeCompletions[selectedChallenge.id] || [];
         const newCompletion = {
           completedAt: new Date().toISOString(),
-          reward: reward
+          reward: reward,
         };
 
         const updatedCompletions = {
           ...challengeCompletions,
-          [selectedChallenge.id]: [...existingCompletions, newCompletion]
+          [selectedChallenge.id]: [...existingCompletions, newCompletion],
         };
 
         // Update state and localStorage
         setChallengeCompletions(updatedCompletions);
-        localStorage.setItem('challengeCompletions', JSON.stringify(updatedCompletions));
+        localStorage.setItem(
+          "challengeCompletions",
+          JSON.stringify(updatedCompletions)
+        );
 
-        // Close reward dialog and open success dialog
         handleCloseRewardDialog();
         setDialogOpen(true);
       } catch (error) {
-        console.error('Error completing challenge:', error);
+        console.error("Error completing challenge:", error);
         handleCloseRewardDialog();
       }
     }
@@ -142,11 +143,12 @@ const DailyChallenges = () => {
     try {
       const completions = challengeCompletions[challengeId] || [];
       const today = new Date().toDateString();
-      return completions.filter(completion => 
-        new Date(completion.completedAt).toDateString() === today
+      return completions.filter(
+        (completion) =>
+          new Date(completion.completedAt).toDateString() === today
       );
     } catch (error) {
-      console.error('Error getting today completions:', error);
+      console.error("Error getting today completions:", error);
       return [];
     }
   };
@@ -161,7 +163,7 @@ const DailyChallenges = () => {
         <Card className={classes.challengeCard}>
           <CardContent className={classes.challengeCardContent}>
             <Box display="flex" alignItems="center" marginBottom={2}>
-              <Icon style={{ marginRight: 10, color: '#2575fc' }} />
+              <Icon style={{ marginRight: 10, color: "#2575fc" }} />
               <Typography variant="h6" color="textPrimary">
                 {challenge.title}
               </Typography>
@@ -169,14 +171,13 @@ const DailyChallenges = () => {
             <Typography variant="body2" color="textSecondary" gutterBottom>
               {challenge.description}
             </Typography>
-            
-            <Box 
+
+            <Box
               className={classes.completionBadge}
-              style={{ backgroundColor: '#f0f4f8', marginBottom: '10px' }}
-            >
-            </Box>
-            
-            <Button 
+              style={{ backgroundColor: "#f0f4f8", marginBottom: "10px" }}
+            ></Box>
+
+            <Button
               variant="contained"
               color="primary"
               className={classes.completeButton}
@@ -193,28 +194,26 @@ const DailyChallenges = () => {
 
   return (
     <Card className={classes.challengeContainer}>
-      <Box 
+      <Box
         className={classes.totalRewardsContainer}
         style={{
-          backgroundColor: '#3a5a40',
-          color: 'white',
-          padding: '8px',
-          textAlign: 'center',
-          borderRadius: '12px',
-          margin: '8px'
+          backgroundColor: "#3a5a40",
+          color: "white",
+          padding: "8px",
+          textAlign: "center",
+          borderRadius: "12px",
+          margin: "8px",
         }}
       >
-        <Typography variant="h6">
-          Total Challenge Savings
-        </Typography>
-        <Typography variant="h5" style={{ fontWeight: 'bold' }}>
+        <Typography variant="h6">Total Challenge Savings</Typography>
+        <Typography variant="h5" style={{ fontWeight: "bold" }}>
           ${totalChallengeRewards.toFixed(2)}
         </Typography>
       </Box>
 
       <div className={classes.challengeHeader}>
         <Typography variant="h6" className={classes.challengeTitle}>
-           Savings Challenges
+          Savings Challenges
         </Typography>
         <Typography variant="body2" className={classes.challengeDescription}>
           Complete challenges to increase your savings!
@@ -227,14 +226,12 @@ const DailyChallenges = () => {
         </Grid>
       </CardContent>
 
-      <Dialog 
-        open={rewardDialogOpen} 
-        onClose={handleCloseRewardDialog}
-      >
+      <Dialog open={rewardDialogOpen} onClose={handleCloseRewardDialog}>
         <DialogTitle>Set Your Challenge Savings</DialogTitle>
         <DialogContent>
           <Typography>
-            How much would you like to reward yourself with savings for completing the "{selectedChallenge?.title}" challenge?
+            How much would you like to reward yourself with savings for
+            completing the "{selectedChallenge?.title}" challenge?
           </Typography>
           <TextField
             autoFocus
@@ -251,9 +248,9 @@ const DailyChallenges = () => {
           <Button onClick={handleCloseRewardDialog} color="primary">
             Cancel
           </Button>
-          <Button 
-            onClick={() => handleCompleteChallenge(userDefinedReward)} 
-            color="primary" 
+          <Button
+            onClick={() => handleCompleteChallenge(userDefinedReward)}
+            color="primary"
             disabled={userDefinedReward <= 0}
           >
             Set Reward
@@ -261,23 +258,24 @@ const DailyChallenges = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog 
-        open={dialogOpen} 
+      <Dialog
+        open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         classes={{ paper: classes.completedDialog }}
       >
         <DialogTitle>Challenge Completed!</DialogTitle>
         <DialogContent>
           <Typography>
-            Congratulations! You've earned ${userDefinedReward.toFixed(2)} for completing this challenge.
+            Congratulations! You've earned ${userDefinedReward.toFixed(2)} for
+            completing this challenge.
           </Typography>
-          <Typography style={{ marginTop: '10px' }}>
+          <Typography style={{ marginTop: "10px" }}>
             Total Challenge Reward Savings: ${totalChallengeRewards.toFixed(2)}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setDialogOpen(false)} 
+          <Button
+            onClick={() => setDialogOpen(false)}
             className={classes.dialogCloseButton}
           >
             Close
