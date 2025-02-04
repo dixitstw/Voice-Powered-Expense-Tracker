@@ -102,14 +102,17 @@ const BudgetTracker = () => {
                 ${totalExpense.toFixed(2)} / ${budgetAmount.toFixed(2)}
               </Typography>
               <LinearProgress 
-                variant="determinate" 
-                value={progressPercentage}
-                color={progressPercentage > 100 ? 'secondary' : 'primary'}
-                classes={{
-                  root: classes.progressRoot,
-                  bar: classes.progressBar
-                }}
-              />
+  variant="determinate" 
+  value={progressPercentage}
+  style={{
+    height: '8px',
+    borderRadius: '4px',
+    backgroundColor: '#d3d3d3', // Light grey background
+  }}
+  classes={{
+    bar: progressPercentage > 100 ? classes.overBudget : classes.underBudget
+  }}
+/>
             </div>
           );
         })}

@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
 dotenv.config();
+
 const app = express();
 
 app.use(cors());

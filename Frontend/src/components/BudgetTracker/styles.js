@@ -2,9 +2,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles((theme) => ({
   budgetCard: {
-    height: '95vh', 
+    height: '85vh', 
     maxWidth: '100%',
-    margin: '2vh auto', 
     display: 'flex',
     flexDirection: 'column',
     boxShadow: '0 8px 20px rgba(0,0,0,0.15)', // Enhanced shadow
@@ -60,7 +59,10 @@ export default makeStyles((theme) => ({
     height: 10,
     borderRadius: 5,
   },
-  progressBar: {
-    borderRadius: 5,
+  underBudget: {
+    backgroundColor: theme.palette.primary.main, // Normal progress color
+  },
+  overBudget: {
+    backgroundColor: 'red !important', // Force red when over budget
   },
 }));

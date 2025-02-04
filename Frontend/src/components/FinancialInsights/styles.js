@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles((theme) => ({
   insightsCard: {
     width: '100%',
-    marginTop: '0.5rem',
+    marginTop: '2rem',
     marginBottom: '1rem',
     maxWidth: '1200px', // Maximum width to prevent overstretching
     height: '95vh', // Slightly less than full viewport for breathing room

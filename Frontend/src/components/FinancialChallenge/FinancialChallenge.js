@@ -9,18 +9,25 @@ import {
   DialogContent,
   DialogActions,
   Box,
-  TextField
+  TextField,
+  Grid
 } from '@material-ui/core';
+import { 
+  LocalDining as DiningIcon, 
+  DirectionsBus as TransportIcon, 
+  ShoppingCart as ShoppingIcon, 
+  PowerOff as UtilityIcon 
+} from '@material-ui/icons';
 import { ExpenseTrackerContext } from '../../context/context';
 import useStyles from './styles';
 
-const DailyChallenge = () => {
+const DailyChallenges = () => {
   const classes = useStyles();
-  const [currentChallenge, setCurrentChallenge] = useState(null);
-  const [challengeCompleted, setChallengeCompleted] = useState(false);
+  const [challengeCompletions, setChallengeCompletions] = useState({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [rewardDialogOpen, setRewardDialogOpen] = useState(false);
   const [totalChallengeRewards, setTotalChallengeRewards] = useState(0);
+  const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [userDefinedReward, setUserDefinedReward] = useState(0);
   const { addTransaction, transactions } = useContext(ExpenseTrackerContext);
 
@@ -29,141 +36,197 @@ const DailyChallenge = () => {
       id: 1,
       title: "No Dining Out Challenge",
       description: "Cook all meals at home today",
-      category: "Food"
+      category: "Food",
+      icon: DiningIcon
     },
     {
       id: 2,
       title: "Transport Savings",
       description: "Use public transport or walk today",
-      category: "Travel"
+      category: "Travel",
+      icon: TransportIcon
     },
     {
       id: 3,
       title: "Expense Freeze",
       description: "Avoid any unnecessary expenses",
-      category: "Shopping"
+      category: "Shopping",
+      icon: ShoppingIcon
     },
     {
       id: 4,
       title: "Utility Saver",
       description: "Reduce electricity and water usage",
-      category: "Bills"
+      category: "Bills",
+      icon: UtilityIcon
     }
   ];
 
-  // Calculate total challenge rewards
+  useEffect(() => {
+    try {
+      const storedCompletions = localStorage.getItem('challengeCompletions');
+      if (storedCompletions) {
+        setChallengeCompletions(JSON.parse(storedCompletions));
+      }
+    } catch (error) {
+      console.error('Error loading challenge completions:', error);
+      setChallengeCompletions({});
+    }
+  }, []);
+
   useEffect(() => {
     const challengeRewards = transactions
-      .filter(transaction => 
-        transaction.category === 'Challenge Reward'
-      )
-      .reduce((total, transaction) => total + transaction.amount, 0);
+      ? transactions
+          .filter(transaction => transaction.category === 'Challenge Reward')
+          .reduce((total, transaction) => total + transaction.amount, 0)
+      : 0;
     
     setTotalChallengeRewards(challengeRewards);
   }, [transactions]);
 
-  useEffect(() => {
-    const storedChallenge = localStorage.getItem('dailyChallenge');
-    const storedDate = localStorage.getItem('challengeDate');
-    const today = new Date().toDateString();
-
-    if (storedChallenge && storedDate === today) {
-      setCurrentChallenge(JSON.parse(storedChallenge));
-    } else {
-      const randomChallenge = dailyChallenges[Math.floor(Math.random() * dailyChallenges.length)];
-      setCurrentChallenge(randomChallenge);
-      localStorage.setItem('dailyChallenge', JSON.stringify(randomChallenge));
-      localStorage.setItem('challengeDate', today);
-    }
-  }, []);
-
-  const handleOpenRewardDialog = () => {
+  const handleOpenRewardDialog = (challenge) => {
+    setSelectedChallenge(challenge);
+    setUserDefinedReward(0);
     setRewardDialogOpen(true);
   };
 
   const handleCloseRewardDialog = () => {
     setRewardDialogOpen(false);
-  };
-
-  const handleSetReward = () => {
-    if (userDefinedReward > 0) {
-      handleCompleteChallenge(userDefinedReward);
-      handleCloseRewardDialog();
-    }
+    setSelectedChallenge(null);
+    setUserDefinedReward(0);
   };
 
   const handleCompleteChallenge = (reward) => {
-    if (currentChallenge) {
-      const rewardTransaction = {
-        type: 'Income',
-        category: 'Challenge Reward',
-        amount: reward,
-        date: new Date().toISOString().split('T')[0],
-        id: `challenge-${Date.now()}`
-      };
+    if (selectedChallenge && reward > 0) {
+      try {
+        // Create the transaction object
+        const rewardTransaction = {
+          type: 'Income',
+          category: 'Challenge Reward',
+          amount: parseFloat(reward),
+          date: new Date().toISOString().split('T')[0],
+          id: Math.floor(Math.random() * 1000000), // Generate a random ID
+          title: `${selectedChallenge.title} Reward` // Add a title for the transaction
+        };
 
-      addTransaction(rewardTransaction);
-      setChallengeCompleted(true);
-      setDialogOpen(true);
-      localStorage.removeItem('dailyChallenge');
-      localStorage.removeItem('challengeDate');
+        // Add the transaction using the context
+        addTransaction(rewardTransaction);
+
+        // Update challenge completions
+        const existingCompletions = challengeCompletions[selectedChallenge.id] || [];
+        const newCompletion = {
+          completedAt: new Date().toISOString(),
+          reward: reward
+        };
+
+        const updatedCompletions = {
+          ...challengeCompletions,
+          [selectedChallenge.id]: [...existingCompletions, newCompletion]
+        };
+
+        // Update state and localStorage
+        setChallengeCompletions(updatedCompletions);
+        localStorage.setItem('challengeCompletions', JSON.stringify(updatedCompletions));
+
+        // Close reward dialog and open success dialog
+        handleCloseRewardDialog();
+        setDialogOpen(true);
+      } catch (error) {
+        console.error('Error completing challenge:', error);
+        handleCloseRewardDialog();
+      }
     }
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const getTodayCompletions = (challengeId) => {
+    try {
+      const completions = challengeCompletions[challengeId] || [];
+      const today = new Date().toDateString();
+      return completions.filter(completion => 
+        new Date(completion.completedAt).toDateString() === today
+      );
+    } catch (error) {
+      console.error('Error getting today completions:', error);
+      return [];
+    }
   };
 
-  if (!currentChallenge) return null;
+  const renderChallengeCard = (challenge) => {
+    const Icon = challenge.icon;
+    const todayCompletions = getTodayCompletions(challenge.id);
+    const totalCompletions = (challengeCompletions[challenge.id] || []).length;
+
+    return (
+      <Grid item xs={12} sm={6} key={challenge.id}>
+        <Card className={classes.challengeCard}>
+          <CardContent className={classes.challengeCardContent}>
+            <Box display="flex" alignItems="center" marginBottom={2}>
+              <Icon style={{ marginRight: 10, color: '#2575fc' }} />
+              <Typography variant="h6" color="textPrimary">
+                {challenge.title}
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+              {challenge.description}
+            </Typography>
+            
+            <Box 
+              className={classes.completionBadge}
+              style={{ backgroundColor: '#f0f4f8', marginBottom: '10px' }}
+            >
+            </Box>
+            
+            <Button 
+              variant="contained"
+              color="primary"
+              className={classes.completeButton}
+              onClick={() => handleOpenRewardDialog(challenge)}
+              fullWidth
+            >
+              Complete Challenge
+            </Button>
+          </CardContent>
+        </Card>
+      </Grid>
+    );
+  };
 
   return (
     <Card className={classes.challengeContainer}>
-      {/* Total Challenge Rewards Display */}
       <Box 
         className={classes.totalRewardsContainer}
         style={{
           backgroundColor: '#3a5a40',
           color: 'white',
-          padding: '4px',
+          padding: '8px',
           textAlign: 'center',
           borderRadius: '12px',
-          margin: '4px'
+          margin: '8px'
         }}
       >
-        <Typography variant="h8">
+        <Typography variant="h6">
           Total Challenge Savings
         </Typography>
-        <Typography variant="h6" style={{ fontWeight: 'bold' }}>
+        <Typography variant="h5" style={{ fontWeight: 'bold' }}>
           ${totalChallengeRewards.toFixed(2)}
         </Typography>
       </Box>
 
       <div className={classes.challengeHeader}>
         <Typography variant="h6" className={classes.challengeTitle}>
-          Daily Financial Challenge
+           Savings Challenges
         </Typography>
         <Typography variant="body2" className={classes.challengeDescription}>
-          Your daily opportunity to save and earn!
+          Complete challenges to increase your savings!
         </Typography>
       </div>
-      <CardContent className={classes.challengeContent}>
-        <Typography variant="h6" color="textPrimary">
-          {currentChallenge.title}
-        </Typography>
-        <Typography variant="body1" color="textSecondary" gutterBottom>
-          {currentChallenge.description}
-        </Typography>
-        <Button 
-          className={classes.completeButton}
-          onClick={handleOpenRewardDialog}
-          disabled={challengeCompleted}
-          fullWidth
-        >
-          Complete Challenge
-        </Button>
+
+      <CardContent>
+        <Grid container spacing={2}>
+          {dailyChallenges.map(renderChallengeCard)}
+        </Grid>
       </CardContent>
 
-      {/* Reward Input Dialog */}
       <Dialog 
         open={rewardDialogOpen} 
         onClose={handleCloseRewardDialog}
@@ -171,7 +234,7 @@ const DailyChallenge = () => {
         <DialogTitle>Set Your Challenge Savings</DialogTitle>
         <DialogContent>
           <Typography>
-            How much would you like to reward yourself with savings for completing this challenge?
+            How much would you like to reward yourself with savings for completing the "{selectedChallenge?.title}" challenge?
           </Typography>
           <TextField
             autoFocus
@@ -181,7 +244,7 @@ const DailyChallenge = () => {
             fullWidth
             value={userDefinedReward}
             onChange={(e) => setUserDefinedReward(Number(e.target.value))}
-            inputProps={{ min: 0 }}
+            inputProps={{ min: 0, step: "0.01" }}
           />
         </DialogContent>
         <DialogActions>
@@ -189,7 +252,7 @@ const DailyChallenge = () => {
             Cancel
           </Button>
           <Button 
-            onClick={handleSetReward} 
+            onClick={() => handleCompleteChallenge(userDefinedReward)} 
             color="primary" 
             disabled={userDefinedReward <= 0}
           >
@@ -198,16 +261,15 @@ const DailyChallenge = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Challenge Completed Dialog */}
       <Dialog 
         open={dialogOpen} 
-        onClose={handleCloseDialog}
+        onClose={() => setDialogOpen(false)}
         classes={{ paper: classes.completedDialog }}
       >
         <DialogTitle>Challenge Completed!</DialogTitle>
         <DialogContent>
           <Typography>
-            Congratulations! You've earned ${userDefinedReward} for completing today's challenge.
+            Congratulations! You've earned ${userDefinedReward.toFixed(2)} for completing this challenge.
           </Typography>
           <Typography style={{ marginTop: '10px' }}>
             Total Challenge Reward Savings: ${totalChallengeRewards.toFixed(2)}
@@ -215,7 +277,7 @@ const DailyChallenge = () => {
         </DialogContent>
         <DialogActions>
           <Button 
-            onClick={handleCloseDialog} 
+            onClick={() => setDialogOpen(false)} 
             className={classes.dialogCloseButton}
           >
             Close
@@ -226,4 +288,4 @@ const DailyChallenge = () => {
   );
 };
 
-export default DailyChallenge;
+export default DailyChallenges;
